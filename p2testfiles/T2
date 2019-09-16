@@ -1,0 +1,22 @@
+#!/bin/sh
+
+
+$1/p2  IRIS.net  IRIS.csv  0 150 0 150 32 1
+
+echo 
+echo "RMB ~100"
+echo
+
+sleep 3
+
+echo
+echo "---------------------------------------------------------------"
+echo
+
+
+$1/p2  IRIS.net  IRIS.csv  0 150 0 150 132 0
+
+echo 
+echo "RMB ~101"
+echo
+

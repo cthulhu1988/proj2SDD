@@ -1,0 +1,21 @@
+#!/bin/sh
+
+
+$1/p2  SEEDS.net  SEEDS.csv  0 210 0 210 32 1
+
+echo 
+echo "RMB ~137"
+echo
+
+sleep 3
+
+echo
+echo "---------------------------------------------------------------"
+echo
+
+
+$1/p2  SEEDS.net  SEEDS.csv  0 210 0 210 252 0
+
+echo 
+echo "RMB ~180"
+echo
