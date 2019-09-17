@@ -1,6 +1,6 @@
 
-p1:    p1.py
-	cp p1.py p1
-	chmod +x p1
+p1:    p2.py
+	cp p2.py p2
+	chmod +x p2
 clean:
-	rm -f p1
+	rm -f p2
