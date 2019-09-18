@@ -34,14 +34,14 @@ This new program will take 8 command-line arguments:
         note that this acts like python's  low:high  indexes for lists etc
 
     num_epochs
-        number of iterations to perform over the train input records before 
+        number of iterations to perform over the train input records before
         beginning the testing phase
 
     print_internals_flag
         this flag will be 0 or 1; if 1, print the internal values of each neuron
         in the NN  before training and after training (before testing); print one
         line per neuron, containing this info:
-            bias 
+            bias
             weights
             output (if one has been computed by training)
             delta  (if one has been computed by training)
