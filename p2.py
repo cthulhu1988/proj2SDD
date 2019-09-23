@@ -10,8 +10,9 @@ class Neuron:
         self.neuron = neuron
         self.weightList = weightList
         self.bias = bias
+        self.value = 0
     def printStats(self):
-        print("layer {} neuron {} weightList {} and BIAS: {}".format(self.layer, self.neuron, self.weightList, self.bias))
+        print("layer {} neuron {} weightList {} and BIAS{} and value{}".format(self.layer, self.neuron, self.weightList, self.bias, self.value))
 
 def NeuronMaker(listData):
     layer = int(listData[0])
@@ -107,32 +108,49 @@ def main():
         csv_row = CSVinputList[x]
         csv_inputs = csv_row[:-1]
         csv_desired = csv_row[-1]
-        print("inputs {} and desired {}".format(csv_inputs, csv_desired))
+        #print("inputs {} and desired {}".format(csv_inputs, csv_desired))
 
-    currentLayer = 0
-    newHiddenList=[]
-    sum = 0
-    for n in neuronList:
-        n.printStats()
-        if n.layer == currentLayer:
-            for x in range(len(inputData)):
-                sum += n.weightList[x] * inputData[x]
-            sum += n.bias
-            newHiddenList.append(sigmoid(sum))
-            sum = 0
+        inputData = csv_inputs
+
+        currentLayer = 0
+        newHiddenList=[]
+        sum = 0
+        for n in neuronList:
+            n.printStats()
             print()
-        else:
-            inputData = newHiddenList
-            newHiddenList = []
-            sum = 0
-            currentLayer +=1
-            for x in range(len(inputData)):
-                sum += n.weightList[x] * inputData[x]
-            sum+=n.bias
-            newHiddenList.append(sigmoid(sum))
-            sum = 0
-    print("Final output: ", newHiddenList)
+            if n.layer == currentLayer:
+                print("inputData", inputData)
+                for x in range(len(inputData)):
+                    sum += n.weightList[x] * inputData[x]
+                    print("weights {}, inputs {}, sum {}".format(n.weightList[x], inputData[x], sum))
+                    print("on layer {} node {}".format(n.layer, n.neuron))
+                sum += n.bias
+                neuronalSum = sigmoid(sum)
+                n.value = neuronalSum
+                newHiddenList.append(neuronalSum)
+                sum = 0
+                print("neuronal sum {} for node {} layer {}".format(n.value, n.neuron, n.layer))
+                print()
+            else:
+                inputData = newHiddenList
+                newHiddenList = []
+                sum = 0
+                currentLayer +=1
+                for x in range(len(inputData)):
+                    sum += n.weightList[x] * inputData[x]
+                    print("weights {}, inputs {}, sum {}".format(n.weightList[x], inputData[x], sum))
+                    print("on layer {} node {}".format(n.layer, n.neuron))
+                sum += n.bias
+                neuronalSum = sigmoid(sum)
+                n.value = neuronalSum
+                newHiddenList.append(neuronalSum)
+                sum = 0
+                print("neuronal sum {} for node {} layer {}".format(n.value, n.neuron, n.layer))
+                print()
 
+        print("Final output newHiddenList: ", newHiddenList)
+        for m in neuronList:
+            m.printStats()
 
 
 # Normalize  numbers between 0 and 1
