@@ -27,19 +27,23 @@ def main():
     layer = 0
     neuron = 0
     bias = 0
-    matrixList =[]
-
+    neuronList =[]
+    # files
     fileNodes = sys.argv[1]
     fileCSV = sys.argv[2]
-    low_trn_rng = sys.argv[3]
-    hi_trn_rng = sys.argv[4]
-    low_tst_rng = sys.argv[5]
-    hi_tst_rng = sys.argv[6]
-    epochs = sys.argv[7]
-    internals_flag = sys.argv[8]
+    # low and high training range
+    low_trn_rng = int(sys.argv[3])
+    hi_trn_rng = int(sys.argv[4])
+    # low and high testing range
+    low_tst_rng = int(sys.argv[5])
+    hi_tst_rng = int(sys.argv[6])
+
+    epochs = int(sys.argv[7])
+    # whether to print extra data
+    internals_flag = int(sys.argv[8])
 
 
-    # NODES file
+    # OPEN and PARSE NODES file ################################
     with open(fileNodes, 'r') as fp:
         line = fp.readline()
         inputs=''
@@ -61,16 +65,54 @@ def main():
             data = data.strip()
             listData = data.split()
             if len(listData)>0:
-                matrixList.append(NeuronMaker(listData))
+                neuronList.append(NeuronMaker(listData))
 
 
             line = fp.readline()
     fp.close()
 
+    # OPEN and PARSE CSV file ##########################
+    with open(fileCSV, newline = '') as csvfile:
+        reader = csv.reader(csvfile, delimiter=',', quotechar='|')
+        # read whole file.
+        CSVinputList = []
+        rowleng = 0
+        for row in reader:
+            rowleng = len(row) -1
+            CSVinputList.append(row)
+
+############## Normalize data in list ###################
+        count = 0
+        min = 1000
+        max = 0
+        while count < rowleng:
+            for item in CSVinputList:
+                item[count] = float(item[count])
+                if item[count] < min:
+                    min = item[count]
+                if item[count] > max:
+                    max = item[count]
+            for floatItem in CSVinputList:
+                floatItem[count] = normalized(min, max, floatItem[count])
+                #print("normalized {}".format(floatItem[count]))
+            min = 1000
+            max = 0
+            count +=1
+
+
+
+########### data normalized
+
+    for x in range(low_trn_rng, hi_trn_rng):
+        csv_row = CSVinputList[x]
+        csv_inputs = csv_row[:-1]
+        csv_desired = csv_row[-1]
+        print("inputs {} and desired {}".format(csv_inputs, csv_desired))
+
     currentLayer = 0
     newHiddenList=[]
     sum = 0
-    for n in matrixList:
+    for n in neuronList:
         n.printStats()
         if n.layer == currentLayer:
             for x in range(len(inputData)):
@@ -91,15 +133,7 @@ def main():
             sum = 0
     print("Final output: ", newHiddenList)
 
-    # CSV open file
-    with open(fileCSV, newline = '') as csvfile:
-        reader = csv.reader(csvfile, delimiter=',', quotechar='|')
-        # read whole file.
-        itemList = []
-        for row in reader:
-            itemList.append(row)
-        print(itemList)
-            #print(', '.join(row))
+
 
 # Normalize  numbers between 0 and 1
 # Normalize = number - smallest / the difference between the numbers
@@ -136,8 +170,9 @@ def main():
 
 
 def normalized(smallest, largest, number):
-    return (number - smallest)/(largest - smallest)
-
+    #print("smallest {} largest {} and number to normalize {}".format(smallest, largest, number))
+    normalized = (number - smallest)/(largest - smallest)
+    return normalized
 
 # derivative function
 def sigmoidPrime(x):
