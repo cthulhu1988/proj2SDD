@@ -31,15 +31,16 @@ def main():
 
     fileNodes = sys.argv[1]
     fileCSV = sys.argv[2]
-    low_trn_rng = sys.argv[3]
-    hi_trn_rng = sys.argv[4]
-    low_tst_rng = sys.argv[5]
-    hi_tst_rng = sys.argv[6]
-    epochs = sys.argv[7]
-    internals_flag = sys.argv[8]
 
+    # CSV open file
+    with open(fileCSV, newline = '') as csvfile:
+        reader = csv.reader(csvfile, delimiter=',', quotechar='|')
+        for row in reader:
+            for item in row:
+                print(item)
+            #print(', '.join(row))
 
-    # NODES file
+    # NODES file 
     with open(fileNodes, 'r') as fp:
         line = fp.readline()
         inputs=''
@@ -91,15 +92,6 @@ def main():
             sum = 0
     print("Final output: ", newHiddenList)
 
-    # CSV open file
-    with open(fileCSV, newline = '') as csvfile:
-        reader = csv.reader(csvfile, delimiter=',', quotechar='|')
-        # read whole file.
-        itemList = []
-        for row in reader:
-            itemList.append(row)
-        print(itemList)
-            #print(', '.join(row))
 
 # Normalize  numbers between 0 and 1
 # Normalize = number - smallest / the difference between the numbers
