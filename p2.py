@@ -14,7 +14,7 @@ class Neuron:
         self.delta = 0
 
     def printStats(self):
-        print("layer {} neuron {} weightList {} and BIAS{} and value{}".format(self.layer, self.neuron, self.weightList, self.bias, self.value))
+        print("layer {} neuron {} weightList {} and BIAS {} and value {}".format(self.layer, self.neuron, self.weightList, self.bias, self.value))
 
 def NeuronMaker(listData):
     layer = int(listData[0])
@@ -112,9 +112,6 @@ def main():
         csv_desired = int(csv_row[-1])
         one_hot = [0,0,0]
         one_hot[csv_desired] = 1
-        print("One Hot ", one_hot)
-
-        #print("inputs {} and desired {}".format(csv_inputs, csv_desired))
 
         inputData = csv_inputs
 
@@ -122,21 +119,14 @@ def main():
         newHiddenList=[]
         sum = 0
         for n in neuronList:
-            n.printStats()
-            print()
             if n.layer == currentLayer:
-                #print("inputData", inputData)
                 for x in range(len(inputData)):
                     sum += n.weightList[x] * inputData[x]
-                    #print("weights {}, inputs {}, sum {}".format(n.weightList[x], inputData[x], sum))
-                    #print("on layer {} node {}".format(n.layer, n.neuron))
                 sum += n.bias
                 neuronalSum = sigmoid(sum)
                 n.value = neuronalSum
                 newHiddenList.append(neuronalSum)
                 sum = 0
-                #print("neuronal sum {} for node {} layer {}".format(n.value, n.neuron, n.layer))
-                #print()
             else:
                 inputData = newHiddenList
                 newHiddenList = []
@@ -144,21 +134,18 @@ def main():
                 currentLayer +=1
                 for x in range(len(inputData)):
                     sum += n.weightList[x] * inputData[x]
-                    #print("weights {}, inputs {}, sum {}".format(n.weightList[x], inputData[x], sum))
-                    #print("on layer {} node {}".format(n.layer, n.neuron))
                 sum += n.bias
                 neuronalSum = sigmoid(sum)
                 n.value = neuronalSum
                 newHiddenList.append(neuronalSum)
                 sum = 0
-                #print("neuronal sum {} for node {} layer {}".format(n.value, n.neuron, n.layer))
-                #print()
 
         outPutLayerNumber = currentLayer
         #print("Final output newHiddenList: ", newHiddenList)
         neuronList = reversed(neuronList)
         outputNeuronList = []
         hiddenLayerList = []
+        # split up output and hidden
         for m in neuronList:
             if m.layer == outPutLayerNumber:
                 outputNeuronList.append(m)
@@ -171,39 +158,45 @@ def main():
         partialDerivList = []
         for i in outputNeuronList:
             error = (one_hot[one_h_count] - i.value)
-            # print("error {}".format(error))
             one_h_count +=1
             for x in range(len(i.weightList)):
                 deltaSumOutput += i.weightList[x] * hiddenLayerList[x].value
-            primedSig = sigmoidPrime(deltaSumOutput) * error
-            partialDerivList.append(primedSig)
-            # print("prime sigmoid {}".format(primedSig))
-            i.delta = primedSig
+            primedSig = sigmoidPrime(deltaSumOutput)
+            primedSigErr = primedSig* error
+            partialDerivList.append(primedSigErr)
+            i.delta = primedSigErr
             deltaSumOutput = 0
-            print()
 
+        halfEq = []
         deltaHiddenSum = 0
         for k in hiddenLayerList:
             for x in range(len(k.weightList)):
                 deltaHiddenSum += k.weightList[x] * csv_inputs[x]
-                # print("weights at this point ",k.weightList[x])
-                # print("csv inptu ", csv_inputs[x])
-            deltaHiddenSum = sigmoidPrime(deltaHiddenSum)
-            print("neruron {} layer {}".format(k.neuron, k.layer))
+            k.printStats()
+            halfEq.append(deltaHiddenSum)
+            deltaHiddenSum = 0
+
         amt = 0
-        wLst = len(outputNeuronList[0].weightList) # 5
         nLst = len(outputNeuronList) # 3
+        wLst = len(outputNeuronList[0].weightList)
 
-        for y in range(wLst):
-            print("y", y)
-            for jj in range(nLst):
-                print("jj", jj)
-                print(outputNeuronList[jj].delta)
-                print(outputNeuronList[jj].weightList[y])
+        lastHalfEq = []
+        for jj in range(wLst):
+            for y in range(nLst):
+                amt += outputNeuronList[y].delta * outputNeuronList[y].weightList[jj]
+            lastHalfEq.append(amt)
+            amt = 0
 
-                #amt += outputNeuronList[jj].delta * outputNeuronList[y].weightList[y]
+        zipped =[a*b for a,b in zip(halfEq,lastHalfEq)]
+        zippedPrime = [ sigmoidPrime(a) for a in zipped ]
+        kkCount = 0
+        for kk in hiddenLayerList:
+            kk.delta = zippedPrime[kkCount]
+            kkCount+=1
+        kkCount = 0
 
-
+        for item in hiddenLayerList:
+            print(item.delta)
 
 # Normalize  numbers between 0 and 1
 # Normalize = number - smallest / the difference between the numbers
