@@ -203,7 +203,7 @@ def main():
             itemCount = 0
             for i in range(len(item.weightList)):
                 print(item.weightList[i])
-                item.weightList[i] += item.weightList[i] * item.delta * hiddenLayerList[i].value
+                item.weightList[i] += item.weightList[i] * item.delta * hiddenLayerList[i].value *-.05
                 print(item.weightList[i])
             print()
 
