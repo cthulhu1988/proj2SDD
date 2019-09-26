@@ -142,7 +142,7 @@ def main():
 
         outPutLayerNumber = currentLayer
         #print("Final output newHiddenList: ", newHiddenList)
-        neuronList = reversed(neuronList)
+        #neuronList = reversed(neuronList)
         outputNeuronList = []
         hiddenLayerList = []
         # split up output and hidden
@@ -157,22 +157,25 @@ def main():
         one_h_count = 0
         partialDerivList = []
         for i in outputNeuronList:
-            error = (one_hot[one_h_count] - i.value)
+            error = (one_hot[one_h_count] - i.value)**2
+            print("error {}".format(error))
             one_h_count +=1
             for x in range(len(i.weightList)):
                 deltaSumOutput += i.weightList[x] * hiddenLayerList[x].value
             primedSig = sigmoidPrime(deltaSumOutput)
             primedSigErr = primedSig* error
             partialDerivList.append(primedSigErr)
+            # set deltas of output neurons
             i.delta = primedSigErr
             deltaSumOutput = 0
+            #i.printStats()
 
         halfEq = []
         deltaHiddenSum = 0
         for k in hiddenLayerList:
+            k.printStats()
             for x in range(len(k.weightList)):
                 deltaHiddenSum += k.weightList[x] * csv_inputs[x]
-            k.printStats()
             halfEq.append(deltaHiddenSum)
             deltaHiddenSum = 0
 
@@ -195,10 +198,23 @@ def main():
             kkCount+=1
         kkCount = 0
 
-        for item in hiddenLayerList:
-            print(item.delta)
+        print("Item in neuron list")
+        for item in outputNeuronList:
+            itemCount = 0
+            for i in range(len(item.weightList)):
+                print(item.weightList[i])
+                item.weightList[i] += item.weightList[i] * item.delta * hiddenLayerList[i].value
+                print(item.weightList[i])
+            print()
 
-# Normalize  numbers between 0 and 1
+        for itm in hiddenLayerList:
+            for i in range(len(itm.weightList)):
+                print(itm.weightList[i])
+                itm.weightList[i] = itm.weightList[i] * itm.delta * inputData[i]
+                print(itm.weightList[i])
+            print()
+
+
 # Normalize = number - smallest / the difference between the numbers
 # so for 1 and 5 -> 1 -1 = 0 / d=4 = 0
 
