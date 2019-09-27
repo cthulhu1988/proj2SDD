@@ -131,10 +131,9 @@ def main():
                 print(listData)
                 neuronList.append(NeuronMaker(listData))
             line = fp.readline()
-            for n in neuronList:
-                
 
     fp.close()
+
 
     for n in neuronList:
         print("stats")
@@ -194,9 +193,12 @@ def main():
             #print(inputData)
 
             newNN.train(inputData, one_hot)
+        if(y % 10 == 0):
+            print("Epoch :",y)
+            print(newNN.query(inputData))
+
 
     test = np.array([0.194, 0.541, 0.067, 0.041,0.1,0.1,0.1])
-    print(newNN.query(test))
 
 
 
