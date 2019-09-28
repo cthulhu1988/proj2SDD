@@ -31,16 +31,14 @@ class NeuralNet:
         middle_layer_outputs = np.array([self.sigmoid(x) for x in middle_layer_inputs])
         ############################ SECOND LAYER
         final_inputs = np.dot(self.secondLayerWeights, middle_layer_outputs)
-        network_outputs = np.asarray([self.sigmoid(x) for x in final_inputs])
+        final_outputs = np.asarray([self.sigmoid(x) for x in final_inputs])
         ################################ ERRORS
         # Calculate ERRORS at the ouput NODES
         ################## BackPropagation STEPS
-        network_output_error_onehot = np.array(targets - network_outputs, ndmin=2)
-        # print("network output ERRORS")
-        # print(network_output_error_onehot)
-        outputErrorDerived = (network_outputs * (1.0 - network_outputs)) * network_output_error_onehot
+        output_errors = np.array(targets - final_outputs, ndmin=2)
+        outputErrorDerived = (final_outputs * (1.0 - final_outputs)) * output_errors
 
-        hidden_errors = np.dot(self.secondLayerWeights.T, network_output_error_onehot)
+        hidden_errors = np.dot(self.secondLayerWeights.T, output_errors)
         inputErrorDerived = (middle_layer_outputs * (1.0 - middle_layer_outputs)) * hidden_errors
         ################## adjust the weights ########################
         self.secondLayerWeights += np.dot(outputErrorDerived, np.transpose(middle_layer_outputs))
@@ -59,9 +57,9 @@ class NeuralNet:
         # multiply outputs with output weights
         final_inputs = np.dot(self.secondLayerWeights, siged_middle_layer_outputs)
         # run last layer through sigmoid
-        siged_network_outputs = [self.sigmoid(x) for x in final_inputs]
+        siged_final_outputs = [self.sigmoid(x) for x in final_inputs]
 
-        return siged_network_outputs
+        return siged_final_outputs
 
     def sigmoid(self, x):
     # activation function
@@ -183,10 +181,9 @@ def main():
 
 
     newNN = NeuralNet(rowleng,5,3)
-    newNN.firstLayerWeights = layer1
-    newNN.secondLayerWeights = layer2
+    newNN.wInputHidden = layer1
+    newNN.wOutput = layer2
     if(internals_flag) == 1:
-        print("Before Training")
         newNN.printStats()
 
 ########### data normalized
@@ -232,9 +229,8 @@ def main():
             else:
                 percentage = 0
             print("{}   {} correct of {}   {}".format(y,epoch_count_correct, epoch_count, percentage))
-    if(internals_flag) == 1:
-        print("After Training")
-        newNN.printStats()
+            if(internals_flag) == 1:
+                newNN.printStats()
 
     test_count = 0
     test_count_correct = 0
@@ -243,8 +239,11 @@ def main():
         csv_row = CSVinputList[t]
         csv_inputs = csv_row[:-1]
         csv_desired = int(csv_row[-1])
+        # print("csv row")
+        # print(csv_row)
         one_hot_test = [0,0,0]
         one_hot_index = 9
+
         # init onehot with desired output
         if rowleng < 5:
             one_hot_test[csv_desired] = 1
@@ -255,12 +254,19 @@ def main():
 
         # renamed for repeated use
         inputDataTest = np.array(csv_inputs)
+        # print("input data test")
+        # print(inputDataTest)
         test_nums = newNN.testNetwork(inputDataTest)
+        # print("Test Nums")
+        # print(test_nums)
+        # print("output one hot")
+        # print(one_hot_test)
+        # print("desired index")
+        # print(one_hot_index)
         index_test = 0
         max_test = 0
-
         for jj in range(len(test_nums)):
-            if test_nums[jj] > max_test:
+            if test_nums[jj] > max:
                 max_test = test_nums[jj]
                 index_test = jj
         if index_test == one_hot_index:
