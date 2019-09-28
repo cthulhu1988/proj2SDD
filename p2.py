@@ -2,100 +2,7 @@
 import sys, math, csv
 import numpy as np
 
-class NeuralNet:
-
-    def __init__(self, inputNodes,middleNodes,outputNodes ):
-        self.iNodes = inputNodes
-        self.oNodes = outputNodes
-        self.middleNodes = middleNodes
-        # overwritten after data is read in.
-        # creates a  5x4 matrix for the IRIS
-        self.firstLayerWeights = np.random.rand(self.middleNodes,self.iNodes)
-        # creates a 3X5 matrix for the IRIS
-        self.secondLayerWeights = np.random.rand(self.oNodes, self.middleNodes)
-        bias = 1.0
-
-    def printStats(self):
-        print("number of inputs {}, hidden {}, output {}".format(self.iNodes, self.oNodes, self.middleNodes))
-        print("Input Weight Matrix")
-        print(self.firstLayerWeights)
-        print()
-        print("Output Weight Matrix")
-        print(self.secondLayerWeights)
-
-    def train(self, inputs_list, targets_list):
-        inputs = np.array(inputs_list, ndmin=2).T
-        targets = np.array(targets_list, ndmin=2).T
-        ############################# FIRST LAYER
-        middle_layer_inputs = np.dot(self.firstLayerWeights, inputs)
-        middle_layer_outputs = np.array([self.sigmoid(x) for x in middle_layer_inputs])
-        ############################ SECOND LAYER
-        final_inputs = np.dot(self.secondLayerWeights, middle_layer_outputs)
-        network_outputs = np.asarray([self.sigmoid(x) for x in final_inputs])
-        ################################ ERRORS
-        # Calculate ERRORS at the ouput NODES
-        ################## BackPropagation STEPS
-        network_output_error_onehot = np.array(targets - network_outputs, ndmin=2)
-        # print("network output ERRORS")
-        # print(network_output_error_onehot)
-        outputErrorDerived = (network_outputs * (1.0 - network_outputs)) * network_output_error_onehot
-
-        hidden_errors = np.dot(self.secondLayerWeights.T, network_output_error_onehot)
-        inputErrorDerived = (middle_layer_outputs * (1.0 - middle_layer_outputs)) * hidden_errors
-        ################## adjust the weights ########################
-        self.secondLayerWeights += np.dot(outputErrorDerived, np.transpose(middle_layer_outputs))
-        self.firstLayerWeights += np.dot( inputErrorDerived, np.transpose(inputs))
-
-
-
-    def testNetwork(self, input_list):
-        # Create numpy array with input list
-        inputs = np.array(input_list, ndmin=2).T
-
-        # calculate new hidden inputs from inputs and weights of input layer
-        middle_layer_inputs = (np.dot(self.firstLayerWeights, inputs))
-        # run middle layer through sigmoid
-        siged_middle_layer_outputs = [self.sigmoid(x) for x in middle_layer_inputs ]
-        # multiply outputs with output weights
-        final_inputs = np.dot(self.secondLayerWeights, siged_middle_layer_outputs)
-        # run last layer through sigmoid
-        siged_network_outputs = [self.sigmoid(x) for x in final_inputs]
-
-        return siged_network_outputs
-
-    def sigmoid(self, x):
-    # activation function
-        return 1/(1+np.exp(-x))
-
-    def sigmoidPrime(x):
-        return (self.sigmoid(x) - (1-self.sigmoid(x)))
-
-class Neuron:
-    def __init__(self, layer, neuron, weightList, bias):
-        self.layer = layer
-        self.neuron = neuron
-        self.weightList = weightList
-        self.bias = bias
-        self.value = 0
-        self.delta = 0
-
-    def printStats(self):
-        print("layer {} neuron {} weightList {} and BIAS {} and value {}".format(self.layer, self.neuron, self.weightList, self.bias, self.value))
-
-def NeuronMaker(listData):
-    layer = int(listData[0])
-    neuron = int(listData[1])
-    bias = float(listData[-1])
-    weightData = listData[2:-1]
-    weightData = [float(i) for i in weightData]
-    return Neuron(layer, neuron, weightData, bias)
-
 def main():
-
-    inputData = []
-    layer = 0
-    neuron = 0
-    bias = 0
     neuronList =[]
     # files
     fileNodes = sys.argv[1]
@@ -110,8 +17,6 @@ def main():
     epochs = int(sys.argv[7])
     # whether to print extra data
     internals_flag = int(sys.argv[8])
-
-
     # OPEN and PARSE NODES file ################################
     with open(fileNodes, 'r') as fp:
         line = fp.readline()
@@ -137,10 +42,7 @@ def main():
                 #print(listData)
                 neuronList.append(NeuronMaker(listData))
             line = fp.readline()
-
     fp.close()
-
-
     # OPEN and PARSE CSV file ##########################
     with open(fileCSV, newline = '') as csvfile:
         reader = csv.reader(csvfile, delimiter=',', quotechar='|')
@@ -180,8 +82,6 @@ def main():
     layer1 = np.array(layer1)
     layer2 = np.array(layer2)
 
-
-
     newNN = NeuralNet(rowleng,5,3)
     newNN.firstLayerWeights = layer1
     newNN.secondLayerWeights = layer2
@@ -189,7 +89,7 @@ def main():
         print("Before Training")
         newNN.printStats()
 
-########### data normalized
+########### Run through training ####################################
     for y in range(epochs+1):
         epoch_count = 0
         epoch_count_correct = 0
@@ -235,7 +135,7 @@ def main():
     if(internals_flag) == 1:
         print("After Training")
         newNN.printStats()
-
+############################################# testing ##################################
     test_count = 0
     test_count_correct = 0
     for t in range(low_tst_rng, hi_tst_rng):
@@ -253,11 +153,12 @@ def main():
             one_hot_test[csv_desired -1] = 1
             one_hot_index = (csv_desired - 1)
 
+
         # renamed for repeated use
         inputDataTest = np.array(csv_inputs)
         test_nums = newNN.testNetwork(inputDataTest)
         index_test = 0
-        max_test = 0
+        max_test = 0.0
 
         for jj in range(len(test_nums)):
             if test_nums[jj] > max_test:
@@ -265,16 +166,103 @@ def main():
                 index_test = jj
         if index_test == one_hot_index:
             test_count_correct += 1
+
         percentage = test_count_correct / test_count
-    print("Test {} correct of {}   {}".format(test_count_correct, test_count, percentage))
+    print("test result: {} correct of {}   {}".format(test_count_correct, test_count, percentage))
     print()
 
+################## Functions
 
+def NeuronMaker(listData):
+    layer = int(listData[0])
+    neuron = int(listData[1])
+    bias = float(listData[-1])
+    weightData = listData[2:-1]
+    weightData = [float(i) for i in weightData]
+    return Neuron(layer, neuron, weightData, bias)
 
 def normalized(smallest, largest, number):
-    #print("smallest {} largest {} and number to normalize {}".format(smallest, largest, number))
-    normalized = (number - smallest)/(largest - smallest)
-    return normalized
+    normalize = (number - smallest)/(largest - smallest)
+    return normalize
+
+#######################CLASSES
+class NeuralNet:
+
+    def __init__(self, inputNodes,middleNodes,outputNodes ):
+        self.iNodes = inputNodes
+        self.oNodes = outputNodes
+        self.middleNodes = middleNodes
+        # overwritten after data is read in.
+        # creates a  5x4 matrix for the IRIS
+        self.firstLayerWeights = np.random.rand(self.middleNodes,self.iNodes)
+        # creates a 3X5 matrix for the IRIS
+        self.secondLayerWeights = np.random.rand(self.oNodes, self.middleNodes)
+        bias = 1.0
+
+    def printStats(self):
+        print("number of inputs {}, hidden {}, output {}".format(self.iNodes, self.middleNodes, self.oNodes))
+        print("Input Weight Matrix")
+        print(self.firstLayerWeights)
+        print()
+        print("Output Weight Matrix")
+        print(self.secondLayerWeights)
+
+    def train(self, inputs_list, targets_list):
+        inputs = np.array(inputs_list, ndmin=2).T
+        targets = np.array(targets_list, ndmin=2).T
+        ############################# FIRST LAYER
+        middle_layer_inputs = np.dot(self.firstLayerWeights, inputs)
+        middle_layer_outputs = np.array([self.sigmoid(x) for x in middle_layer_inputs])
+        ############################ SECOND LAYER
+        final_inputs = np.dot(self.secondLayerWeights, middle_layer_outputs)
+        network_outputs = np.asarray([self.sigmoid(x) for x in final_inputs])
+        ################################ ERRORS
+        # Calculate ERRORS at the ouput NODES
+        ################## BackPropagation STEPS
+        network_output_error_onehot = np.array(targets - network_outputs, ndmin=2)
+        # print("network output ERRORS")
+        # print(network_output_error_onehot)
+        outputErrorDerived = (network_outputs * (1.0 - network_outputs)) * network_output_error_onehot
+
+        hidden_errors = np.dot(self.secondLayerWeights.T, network_output_error_onehot)
+        inputErrorDerived = (middle_layer_outputs * (1.0 - middle_layer_outputs)) * hidden_errors
+        ################## adjust the weights ########################
+        self.secondLayerWeights += np.dot(outputErrorDerived, np.transpose(middle_layer_outputs))
+        self.firstLayerWeights += np.dot( inputErrorDerived, np.transpose(inputs))
+
+
+###################### Test neural net. Basically forward prop.
+    def testNetwork(self, input_list):
+        # Create numpy array with input list
+        inputs = np.array(input_list, ndmin=2).T
+
+        # calculate new hidden inputs from inputs and weights of input layer
+        middle_layer_inputs = (np.dot(self.firstLayerWeights, inputs))
+        # run middle layer through sigmoid
+        siged_middle_layer_outputs = [self.sigmoid(x) for x in middle_layer_inputs ]
+        # multiply outputs with output weights
+        final_inputs = np.dot(self.secondLayerWeights, siged_middle_layer_outputs)
+        # run last layer through sigmoid
+        siged_network_outputs = [self.sigmoid(x) for x in final_inputs]
+
+        return siged_network_outputs
+
+    def sigmoid(self, x):
+    # activation function
+        return 1/(1+np.exp(-x))
+
+class Neuron:
+    def __init__(self, layer, neuron, weightList, bias):
+        self.layer = layer
+        self.neuron = neuron
+        self.weightList = weightList
+        self.bias = bias
+        self.value = 0
+        self.delta = 0
+
+    def printStats(self):
+        print("layer {} neuron {} weightList {} and BIAS {} and value {}".format(self.layer, self.neuron, self.weightList, self.bias, self.value))
+
 
 
 if __name__ == '__main__':

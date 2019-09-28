@@ -1,10 +1,10 @@
 #!/bin/sh
 
 
-./p2  SEEDS.net  SEEDS.csv  0 210 0 210 320 1
+./p2  IRIS.net  IRIS.csv  0 150 0 150 32 1
 
 echo 
-echo "RMB ~137"
+echo "RMB ~100"
 echo
 
 sleep 3
@@ -14,8 +14,9 @@ echo "---------------------------------------------------------------"
 echo
 
 
-./p2  SEEDS.net  SEEDS.csv  0 210 0 210 252 0
+./p2  IRIS.net  IRIS.csv  0 150 0 150 132 0
 
 echo 
-echo "RMB ~180"
+echo "RMB ~101"
 echo
+
